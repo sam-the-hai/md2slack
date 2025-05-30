@@ -28,7 +28,11 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install --package-lock-only
+          git add package-lock.json
+          git commit -m "Add package-lock.json" || true
 
       - name: Build
         run: npm run build
