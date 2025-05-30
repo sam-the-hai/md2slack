@@ -12,9 +12,13 @@ export class MarkdownToSlackParser {
     if (!md) return '';
     
     try {
-      return md
+      // First convert to plain text with Slack formatting
+      const formattedText = md
         // Headers
-        .replace(/^#{1,6}\s+(.*)$/gm, (_, content) => `*${content.trim()}*`)
+        .replace(/^#{1,6}\s+(.*)$/gm, (_, content) => {
+          const text = content.trim();
+          return `*${text}*`;
+        })
         
         // Text Formatting
         .replace(/\*\*([^*]+)\*\*/g, '*$1*')                // Bold → Bold
@@ -40,10 +44,24 @@ export class MarkdownToSlackParser {
         .replace(/^[-*_]{3,}$/gm, '---')                    // Horizontal rules
         .replace(/^\|(.+)\|$/gm, match => match.replace(/\|/g, ' | ').trim())  // Tables
         
+        // GitHub-specific
+        .replace(/@([a-zA-Z0-9-]+)/g, '@$1')                // Preserve @mentions
+        .replace(/(https?:\/\/[^\s]+)/g, '<$1>')            // Convert bare URLs to links
+        
         // Cleanup
         .replace(/\n{3,}/g, '\n\n')                         // Max 2 newlines
         .replace(/[ \t]+$/gm, '')                           // Remove trailing spaces
         .trim();                                             // Remove leading/trailing whitespace
+
+      // Create a temporary textarea to handle the text
+      const textarea = document.createElement('textarea');
+      textarea.value = formattedText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      return formattedText;
     } catch (error) {
       console.error('Error parsing markdown:', error);
       return 'Error: Could not parse markdown';
