@@ -14,8 +14,8 @@ export class MarkdownToSlackParser {
     try {
       // First convert to plain text with Slack formatting
       const formattedText = md
-        // Headers
-        .replace(/^#{1,6}\s+(.*)$/gm, (_, content) => {
+        // Headers - handle both # and ## style
+        .replace(/^#{1,2}\s+(.*)$/gm, (_, content) => {
           const text = content.trim();
           return `*${text}*`;
         })
@@ -27,8 +27,8 @@ export class MarkdownToSlackParser {
         .replace(/_([^_]+)_/g, '_$1_')                      // Italic (alt) → Italic
         .replace(/~~([^~]+)~~/g, '~$1~')                    // Strikethrough
         
-        // Lists
-        .replace(/^[-*+]\s+(.*)$/gm, '• $1')                // Unordered lists
+        // Lists - handle both - and * style
+        .replace(/^[-*]\s+(.*)$/gm, '• $1')                 // Unordered lists
         .replace(/^\d+\.\s+(.*)$/gm, '$&')                  // Numbered lists
         
         // Links and Images
