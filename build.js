@@ -1,5 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create dist directory if it doesn't exist
 const distDir = path.join(__dirname, 'dist');
@@ -9,23 +13,17 @@ if (!fs.existsSync(distDir)) {
 
 // Copy files to dist
 const filesToCopy = [
-  { src: 'index.html', dest: 'index.html' },
-  { src: 'style.css', dest: 'style.css' },
-  { src: 'js/app.js', dest: 'js/app.js' },
-  { src: 'js/parser.js', dest: 'js/parser.js' },
-  { src: 'js/ui.js', dest: 'js/ui.js' }
+  { src: 'js/parser.js', dest: 'dist/parser.js' },
+  { src: 'js/parser.test.js', dest: 'dist/parser.test.js' },
+  { src: 'package.json', dest: 'dist/package.json' },
+  { src: 'README.md', dest: 'dist/README.md' }
 ];
 
-filesToCopy.forEach(file => {
-  const srcPath = path.join(__dirname, file.src);
-  const destPath = path.join(distDir, file.dest);
-  
-  // Create directory if it doesn't exist
-  const destDir = path.dirname(destPath);
-  if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
-  }
-  
+filesToCopy.forEach(({ src, dest }) => {
+  const srcPath = path.join(__dirname, src);
+  const destPath = path.join(__dirname, dest);
   fs.copyFileSync(srcPath, destPath);
-  console.log(`Copied ${file.src} to ${file.dest}`);
-}); 
+  console.log(`Copied ${src} to ${dest}`);
+});
+
+console.log('Build completed successfully!'); 
