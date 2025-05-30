@@ -10,58 +10,52 @@ export class MarkdownToSlackParser {
    */
   static parse(md) {
     if (!md) return '';
-    
     try {
-      // First convert to plain text with Slack formatting
-      const formattedText = md
-        // Headers - handle both # and ## style
-        .replace(/^#{1,2}\s+(.*)$/gm, (_, content) => {
-          const text = content.trim();
-          return `*${text}*`;
-        })
-        
-        // Text Formatting
-        .replace(/\*\*([^*]+)\*\*/g, '*$1*')                // Bold → Bold
-        .replace(/\*([^*]+)\*/g, '_$1_')                    // Italic → Italic
-        .replace(/__([^_]+)__/g, '*$1*')                    // Bold (alt) → Bold
-        .replace(/_([^_]+)_/g, '_$1_')                      // Italic (alt) → Italic
-        .replace(/~~([^~]+)~~/g, '~$1~')                    // Strikethrough
-        
-        // Lists - handle both - and * style
-        .replace(/^[-*]\s+(.*)$/gm, '• $1')                 // Unordered lists
-        .replace(/^\d+\.\s+(.*)$/gm, '$&')                  // Numbered lists
-        
-        // Links and Images
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<$2|$1>')     // Links
+      return md
+        // 1. Headers (all levels)
+        .replace(/^#{1,6}\s+(.*)$/gm, (_, content) => `*${content.trim()}*`)
+
+        // 2. Links and Images (before bold/italic)
         .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<$2|$1>')    // Images
-        
-        // Code
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<$2|$1>')     // Links
+
+        // 3. Bold (strong) - **text** or __text__ or *text*
+        .replace(/\*\*([^*]+)\*\*/g, '*$1*')                // Bold → Bold
+        .replace(/__([^_]+)__/g, '*$1*')                    // Bold (alt) → Bold
+        .replace(/(^|\s)\*([^*\s][^*]*?)\*(?=\s|$)/g, '$1*$2*')  // Single * for bold
+
+        // 4. Italic - _text_ only
+        .replace(/(^|\s)_([^_\s][^_]*?)_(?=\s|$)/g, '$1_$2_')  // Italic
+
+        // 5. Strikethrough
+        .replace(/~~([^~]+)~~/g, '~$1~')
+
+        // 6. Lists
+        .replace(/^[-*+]\s+(.*)$/gm, '• $1')                // Unordered lists
+        .replace(/^\d+\.\s+(.*)$/gm, '$&')                  // Numbered lists
+
+        // 7. Code
         .replace(/^```(\w*)\n([\s\S]*?)```/gm, '```$1\n$2```')  // Code blocks
         .replace(/`([^`]+)`/g, '`$1`')                      // Inline code
-        
-        // Other Elements
+
+        // 8. Blockquotes
         .replace(/^>\s+(.*)$/gm, '> $1')                    // Blockquotes
+
+        // 9. Horizontal rules
         .replace(/^[-*_]{3,}$/gm, '---')                    // Horizontal rules
-        .replace(/^\|(.+)\|$/gm, match => match.replace(/\|/g, ' | ').trim())  // Tables
-        
-        // GitHub-specific
+
+        // 10. Tables (simple)
+        .replace(/^\|(.+)\|$/gm, match => match.replace(/\|/g, ' | ').trim())
+
+        // 11. GitHub-specific
         .replace(/@([a-zA-Z0-9-]+)/g, '@$1')                // Preserve @mentions
-        .replace(/(https?:\/\/[^\s]+)/g, '<$1>')            // Convert bare URLs to links
-        
-        // Cleanup
+        // Convert bare URLs to links, but not if already inside <...|...>
+        .replace(/(^|\s)(https?:\/\/[^\s<>]+[^.,;:!?)\]\s<>])(?=\s|$)/g, '$1<$2>')
+
+        // 12. Cleanup
         .replace(/\n{3,}/g, '\n\n')                         // Max 2 newlines
         .replace(/[ \t]+$/gm, '')                           // Remove trailing spaces
         .trim();                                             // Remove leading/trailing whitespace
-
-      // Create a temporary textarea to handle the text
-      const textarea = document.createElement('textarea');
-      textarea.value = formattedText;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-
-      return formattedText;
     } catch (error) {
       console.error('Error parsing markdown:', error);
       return 'Error: Could not parse markdown';
