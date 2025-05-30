@@ -1,0 +1,16 @@
+{
+  "name": "md2slack",
+  "version": "1.0.0",
+  "description": "Convert Markdown to Slack formatting",
+  "scripts": {
+    "start": "npx http-server -o",
+    "build": "node build.js",
+    "deploy": "npm run build && npx gh-pages -d dist"
+  },
+  "keywords": ["markdown", "slack", "converter"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "gh-pages": "^6.1.0"
+  }
+} 
