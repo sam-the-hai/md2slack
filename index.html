@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown to Slack Converter</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Markdown → Slack Format</h1>
+        <p class="description">Convert your Markdown to Slack-compatible formatting</p>
+      </header>
+
+      <main>
+        <div class="input-section">
+          <label for="input">Markdown Input</label>
+          <textarea
+            id="input"
+            placeholder="Paste your GitHub Markdown here..."
+          ></textarea>
+        </div>
+
+        <div class="controls">
+          <button id="convert" class="primary">Convert</button>
+          <button id="copy">Copy Output</button>
+        </div>
+
+        <div class="output-section">
+          <label for="output">Slack Output</label>
+          <textarea
+            id="output"
+            readonly
+            placeholder="Slack-formatted output will appear here..."
+          ></textarea>
+        </div>
+
+        <div id="status" class="status"></div>
+      </main>
+
+      <footer>
+        <p>Supports: Headers, Lists, Links, Code blocks, Bold, Italic, and more!</p>
+      </footer>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
