@@ -68,4 +68,4 @@ md2slack/
 
 ## License
 
-MIT 
+MIT # md2slack
